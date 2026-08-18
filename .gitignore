@@ -1,0 +1,57 @@
+ # Dependencies
+node_modules/
+vendor/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Build / compiled files
+dist/
+build/
+out/
+*.pyc
+__pycache__/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Uploads / user-generated files
+uploads/
+storage/
+
+# Docker
+.docker/
+
+# Secrets / certificates
+*.pem
+*.key
+*.crt
+
+# Local config
+*.local
