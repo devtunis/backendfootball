@@ -55,6 +55,10 @@ const io = new Server(server,{
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         credentials:true
     }
+    ,  
+    pingInterval: 5000,
+    pingTimeout: 3000,
+
 });
  
 
@@ -227,12 +231,15 @@ io.on("connection",async(socket)=>{
       offLineUsers.set(socket.id , anyy)
       onlineUsers.get(anyy).push({
          socktId : socket.id ,
-         id:socket.data2.id}
+       //  id:socket.data2.id
+       
+        }
         
         )
 
-      console.log(onlineUsers,"✅","lengtth")
+      console.log(onlineUsers.size,"✅","lengtth")
         
+      console.log(onlineUsers,"✅","accept")
         
        
 
@@ -274,7 +281,8 @@ io.on("connection",async(socket)=>{
 
           io.emit("online",[...onlineUsers].map((item)=>({key:item[0],value:item[1]})))
           console.log("disconnect:", socket.id);
-        console.log(onlineUsers,"🌹");
+          console.log(onlineUsers.size,"🌹");
+          console.log(onlineUsers,"disconnect")
 });
 
 

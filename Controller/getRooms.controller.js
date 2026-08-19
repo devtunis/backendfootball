@@ -54,8 +54,8 @@ changeStream.on("change", (change) => {
 export const HandelGetRooms = async(req,res)=>{
   
     try{
-          useCash.aff()
-          console.log("cash")
+         
+        
  
           if(useCash.in(req.user.id+"rooms")){
           return  res.status(SUCCESS).json({

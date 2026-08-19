@@ -1,4 +1,4 @@
-import { connect } from "mongoose"
+import RoomMatches from "../Models/RoomMatches.js"
 import RoomsFollow from "../Models/filter.js"
 import Rooms from "../Models/room.js"
 import { httpStatusCodes } from "../Status/httpStatusCodes.js"
@@ -38,9 +38,11 @@ export const HandelCreatRoom = async(req,res)=>{
     } 
     try{
 
-        const SaveRoom = await new Rooms(Room)
+         const SaveRoom = await new Rooms(Room)
          await SaveRoom.save()
 
+         const SaveRoomMatches = await new RoomMatches({ownerId : req.user.id,roomId:UniqueId ,nameroom:nameRoom})
+         await SaveRoomMatches.save()
 
          const FindYouInRommFolow = await RoomsFollow.findOne({id:req.user.id})
     
