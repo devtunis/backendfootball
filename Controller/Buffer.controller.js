@@ -5,8 +5,9 @@ import { HandelGetRooms } from "../Controller/getRooms.controller.js"
 import { HandedlGetRoom } from "../Controller/get_join_room.controller.js"
 import { HandelSeeRequests } from "../Controller/HandelSeeRequests.controller.js"
 import { HandeLDeleteMemberRoom } from "../Controller/deleteMemberRoom.controller.js"
-
-
+import {HandelVerifyRoom} from "./HandelVerifyRoom.controller.js"
+import {createMatchcontroller} from "./createMatch.controller.js"
+import {CreateFinshedMatchController} from  "./createFinshedMatch.controller.js"
 export  {
     HandelCreatRoom ,
     HandelSetAdmin ,
@@ -14,5 +15,8 @@ export  {
     HandelGetRooms ,
     HandedlGetRoom ,
     HandelSeeRequests, 
-    HandeLDeleteMemberRoom 
+    HandeLDeleteMemberRoom ,
+    HandelVerifyRoom,
+    CreateFinshedMatchController,
+    createMatchcontroller
  }

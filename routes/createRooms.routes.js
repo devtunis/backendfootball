@@ -6,7 +6,9 @@ import {
     HandeLDeleteMemberRoom , 
     HandelGetRooms,
     HandedlGetRoom , 
-    HandelSeeRequests 
+    HandelSeeRequests, 
+    HandelVerifyRoom,
+   
     
     } from  "../Controller/Buffer.controller.js"
 
@@ -20,6 +22,7 @@ router.post("/deleteMember",HandeLDeleteMemberRoom)
 router.get("/getrooms",HandelGetRooms) //OK
 router.post("/joinRoom",HandedlGetRoom)//OK
 router.post("/seeRequests",HandelSeeRequests)//OK
+router.post("/verifyAndBringData",HandelVerifyRoom )//OK
 
  
 

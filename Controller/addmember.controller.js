@@ -82,16 +82,16 @@ export const HandelAddMember = async(req,res)=>{
         }
          
 
-const  DelteFromRoom = await Rooms.findOneAndUpdate(
-    {roomId,
-    "queeRequestJoinRoom.userId" :userId
-    },
-    {
-        $pull:{queeRequestJoinRoom : {userId}}
-    },
-    {returnDocument : "after"}
-)
- 
+        await Rooms.findOneAndUpdate(
+            {roomId,
+            "queeRequestJoinRoom.userId" :userId
+            },
+            {
+                $pull:{queeRequestJoinRoom : {userId}}
+            },
+            {returnDocument : "after"}
+        )
+        
     
 
     

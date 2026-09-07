@@ -1,6 +1,6 @@
 import express, { json } from "express"
 import { InfoMiddle } from "./middleware/info.js"
-import 'dotenv/config';  
+import 'dotenv/config';
 import { ConnectionTodb } from "./ConnectionBd/connectionbd.js";
 import { CustomDns } from "./CustomDns/CustomDns.js";
 import { generateJWT } from "./Jwt/createJwt.js";
@@ -16,17 +16,17 @@ import cookieParser  from "cookie-parser"
 import { createRefreshToken } from "./Jwt/createRefreshToken.js";
 import refresh_token from "./Models/refresh_tokens.js";
 import { v4 as uuidv4 } from 'uuid';
-import { connect } from "mongoose";
 import { verifyTokenRefresh } from "./middleware/verifyTokenRefresh.js";
 import { Server } from "socket.io";
 import http from "http"
-import jwt from "jsonwebtoken"
+ 
 import * as cookie from "cookie"
 import timeout from "connect-timeout";
 
 //imports routes
 
 import RoutesCreateRooms from "./routes/createRooms.routes.js"
+import RotuesCreateMatch  from "./routes/createEventsRoom.routes.js"
 import { limiter } from "./Limter/Limter.js";
 
 const app = express()
@@ -38,7 +38,7 @@ app.use(json(
     }
 ))
 app.use(cors({
-  origin: "http://localhost:5173",  
+  origin: ["http://localhost:5173","https://fnr2rshh-5173.uks1.devtunnels.ms/"],
   credentials: true,
 }));
 
@@ -55,119 +55,53 @@ const io = new Server(server,{
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         credentials:true
     }
-    ,  
+    ,
     pingInterval: 5000,
     pingTimeout: 3000,
 
 });
- 
+
 
 const onlineUsers = new Map()
 const offLineUsers = new  Map()
 
 
+
  
 
-// app.get("/",InfoMiddle("hello"),(req,res)=>{
-  
-    
-//     res.status(200).json({
-//         message : req.user
-//     })
-// })
-// app.post("/test",verifyJWT,async(req,res)=>{
-//     try{
 
-       
-//     console.log(req.body.roomContent)
-
-//      res.status(httpStatusCodes.SUCCESS).json({message :"You can Browse 🎉" , data : req.user})
-//     }catch(err){
-//         res.status(httpStatusCodes.BAD_REQUEST).json({
-//             message : err.message,
-            
-//         })
-//     }
-// })
-// app.post("/test2",verifyJWT,async(req,res)=>{
-//     try{
-
-       
-
-
-//      res.status(httpStatusCodes.SUCCESS).json({message :"You can Browse  2🎉" , data : req.user})
-//     }catch(err){
-//         res.status(httpStatusCodes.BAD_REQUEST).json({
-//             message : err.message,
-            
-//         })
-//     }
-// })
-// app.post("/test3",verifyJWT,async(req,res)=>{
-//     try{
-
-       
-
-
-//      res.status(httpStatusCodes.SUCCESS).json({message :"You can Browse  3🎉" , data : req.user})
-//     }catch(err){
-//         res.status(httpStatusCodes.BAD_REQUEST).json({
-//             message : err.message,
-            
-//         })
-//     }
-// })
-// app.post("/test4",verifyJWT,async(req,res)=>{
-//     try{
-
-       
-
-
-//      res.status(httpStatusCodes.SUCCESS).json({message :"You can Browse  4🎉" , data : req.user})
-//     }catch(err){
-//         res.status(httpStatusCodes.BAD_REQUEST).json({
-//             message : err.message,
-            
-//         })
-//     }
-// })
-
-
-
-
-
-
+ 
  //Middlware
 io.use((socket, next) => {
     const cookieHeader = socket?.handshake?.headers?.cookie
     if(!cookieHeader){
          return next(new Error("Missing cookies"));
     }
-  
+
     const HeaderCookies = cookie?.parseCookie(cookieHeader)
-    
-    
+
+
     if(!HeaderCookies)  {
     return next(new Error("missing cookies"))
-    } 
-
-    
-    
+    }
 
 
 
-    
+
+
+
+
     const verify = verifyJWTComingSocket(HeaderCookies.token)
-    
+
     if(verify ==="missing token") {
-    
+
         return next(new Error("invalid token"))
-    } 
-    
+    }
+
 
     socket.data  = verify.user_name || null
     socket.data2  = verify|| null
-    
+
     next()
 
 
@@ -179,18 +113,18 @@ io.use((socket, next) => {
 
 
 io.on("connection",async(socket)=>{
-  
-  
 
-   
+
+
+
 
     if(!socket.data)
     {
-       
+
        socket.emit("auth_error",{
         reason: "TOKEN_EXPIRED"
        })
-        return 
+        return
     }
 
 
@@ -217,9 +151,9 @@ io.on("connection",async(socket)=>{
 
     const anyy = socket.data // here by username this anny
 
-   
+
     if(anyy){
-           
+
     console.log("connected ⚡",socket.id)
 
      if(!onlineUsers.has(anyy)){
@@ -227,33 +161,33 @@ io.on("connection",async(socket)=>{
 
       }
 
-     
+
       offLineUsers.set(socket.id , anyy)
       onlineUsers.get(anyy).push({
          socktId : socket.id ,
-       //  id:socket.data2.id
-       
+        // img:socket.data2.img
+
         }
-        
+
         )
 
       console.log(onlineUsers.size,"✅","lengtth")
-        
+
       console.log(onlineUsers,"✅","accept")
-        
-       
 
 
-        
+
+
+
 
 
 
       io.emit("online",[...onlineUsers].map((item)=>({key:item[0],value:item[1]})))
 
     }
- 
 
- 
+
+
 
     socket.on("disconnect",()=>{
 
@@ -289,9 +223,9 @@ io.on("connection",async(socket)=>{
 
 })
 
- 
 
 
+// refactor this
 app.post("/login",async(req,res)=>{
     try{
 
@@ -299,23 +233,23 @@ app.post("/login",async(req,res)=>{
         const ConvertHashPassword = await hashPasswordfn(password)
 
         if(!Username || !password){
-           
+
            return  res.status(httpStatusCodes.BAD_REQUEST).json({
                 message : "no body!!"
             })
-            
+
         }
-        
-      
+
+
         const findUser =  await User.findOne({user_name : Username })
-      
+
         if(!findUser){
            return res.status(httpStatusCodes.BAD_REQUEST).json({
                   message : "username or password incorrect"
             })
-             
+
         }
-       
+
 
         const findPasswordFromTheUser = findUser.password
         const verifyPassword = await VerifyPassword(password ,findPasswordFromTheUser)
@@ -323,16 +257,16 @@ app.post("/login",async(req,res)=>{
 
 
         if(verifyPassword){
-              
+
              await refresh_token.findOneAndDelete({
                 id  : findUser.id
              })
-            
-          
 
-              // update the token 
 
-            const LoginAccesToken = generateJWT({id:findUser.id,user_name :findUser.user_name ,img:findUser.img})  
+
+              // update the token
+
+            const LoginAccesToken = generateJWT({id:findUser.id,user_name :findUser.user_name ,img:findUser.img})
             const LoginRefreshTooken = createRefreshToken({id:findUser.id,user_name :findUser.user_name ,img:findUser.img})
 
             const LoginEncryptTheToken = await hashToken(LoginRefreshTooken)
@@ -341,7 +275,7 @@ app.post("/login",async(req,res)=>{
                 id : findUser.id,
                 refresh_token_hash : LoginEncryptTheToken ,
                 time : "1hs",
-                
+
 
             })
 
@@ -351,7 +285,7 @@ app.post("/login",async(req,res)=>{
 
             res.cookie("token", LoginAccesToken, {
                 httpOnly: true,
-                secure: false,  
+                secure: false,
                 sameSite: "lax",
                    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
             });
@@ -359,7 +293,7 @@ app.post("/login",async(req,res)=>{
 
             res.cookie("RefreshToken", LoginRefreshTooken, {
                         httpOnly: true,
-                        secure: false,  
+                        secure: false,
                         sameSite: "lax",
                           maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
                 });
@@ -374,7 +308,7 @@ app.post("/login",async(req,res)=>{
                     LoginRefreshToken,
                     findUser,
                     info :{
-                        id : findUser.id , 
+                        id : findUser.id ,
                         img : findUser.img ,
                         username: findUser.user_name,
                     },
@@ -390,11 +324,11 @@ app.post("/login",async(req,res)=>{
         }
 
 
-      
+
     }catch(err){
         res.status(httpStatusCodes.BAD_REQUEST).json({
             message : err.message,
-            
+
         })
     }
 })
@@ -408,46 +342,46 @@ app.post("/ReinitializingToken",async(req,res)=>{
             })
         }
 
-      
 
-        let Hash = await hashToken(CookiesRefreshToken) 
-      
+
+        let Hash = await hashToken(CookiesRefreshToken)
+
 
         const FindRefershToken = await refresh_token.findOne({refresh_token_hash:Hash}).select("refresh_token_hash")
-   
+
 
 
         if(!FindRefershToken){
            return res.status(httpStatusCodes.BAD_REQUEST).json({
                 message :"we dont found you"
             })
-        } 
-       
-     
+        }
+
+
         const response = verifyTokenRefresh(req,CookiesRefreshToken)
-       
-        
+
+
         if(response.valid){
-            
+
             const {id,user_name,img,password} = response.decoded
             const ReintializingAccesToken = generateJWT({id,user_name,img})
-            
+
           return  res.cookie("token", ReintializingAccesToken, {
                 httpOnly: true,
-                secure: false,  
+                secure: false,
                 sameSite: "lax",
-                 maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم   
+                 maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
             })
             .status(httpStatusCodes.SUCCESS).json({
                   message :`Succes Refresh acces Token mr ${req.user2.user_name} you can browse now 🎉`,
                   data : req.user2,
                   customMessage : "ok"
-                  
+
              })
 
- 
 
-             
+
+
         }
         else{
           return   res.status(httpStatusCodes.BAD_REQUEST).json({
@@ -455,12 +389,12 @@ app.post("/ReinitializingToken",async(req,res)=>{
                 info:"refresh-token-expired"
             })
         }
-      
 
 
 
 
-        
+
+
 
     }catch(error){
         res.status(404).json({
@@ -477,15 +411,15 @@ app.post("/create",async(req,res)=>{
 
 
         // insert to database
-     
+
         const hashedPassword = await HashPasword(user_password);
         const uuid = uuidv4()
         const user = new User({
-                id : uuid , 
+                id : uuid ,
                 user_name :user_name,
                 img :  user_img,
                 password:hashedPassword
-            }) 
+            })
 
 
        // -------------------------------------------------------------
@@ -493,7 +427,7 @@ app.post("/create",async(req,res)=>{
 
 
        const savedUser = await user.save();
-       const AccesToken = generateJWT({id:uuid,user_name  ,img:user_img})  
+       const AccesToken = generateJWT({id:uuid,user_name  ,img:user_img})
        const RefreshTooken = createRefreshToken({id:uuid,user_name  ,img:user_img})
 
         const EncryptTheToken = await hashToken(RefreshTooken)
@@ -502,7 +436,7 @@ app.post("/create",async(req,res)=>{
          id : uuid,
          refresh_token_hash : EncryptTheToken ,
          time : "1h"
-        
+
 
        })
 
@@ -513,7 +447,7 @@ app.post("/create",async(req,res)=>{
 
         res.cookie("token", AccesToken, {
                 httpOnly: true,
-                secure: false,  
+                secure: false,
                 sameSite: "lax",
                   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
          });
@@ -521,7 +455,7 @@ app.post("/create",async(req,res)=>{
 
        res.cookie("RefreshToken", RefreshTooken, {
                 httpOnly: true,
-                secure: false,  
+                secure: false,
                 sameSite: "lax",
                   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
          });
@@ -532,10 +466,10 @@ app.post("/create",async(req,res)=>{
                 user : user,
                 AccesToken : AccesToken,
                 RefreshToken : RefreshTooken
-        
+
         });
-                    
- 
+
+
 
 
     }catch(error){
@@ -547,14 +481,14 @@ app.post("/create",async(req,res)=>{
 })
 app.get("/getmydata",verifyJWT,async(req,res)=>{
     try{
- 
-         
+
+
         res.status(httpStatusCodes.SUCCESS)
         .json(req.user)
-        
+
     }catch(error){
         res.status(httpStatusCodes.BAD_REQUEST).json({
-            messae : error.message 
+            messae : error.message
         })
     }
 })
@@ -562,15 +496,15 @@ app.post("/api/deleteCookies",(req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
-    sameSite: "Strict", 
-    path: "/",           
+    sameSite: "Strict",
+    path: "/",
   });
 
    res.clearCookie("RefreshToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "Strict", 
-    path: "/",           
+    sameSite: "Strict",
+    path: "/",
   });
   res.sendStatus(200);
 });
@@ -593,7 +527,8 @@ app.post("/api/deleteCookies",(req, res) => {
 // Create Routers  room
 
 app.use("/room",verifyJWT,RoutesCreateRooms)
- 
+app.use("/create",verifyJWT,RotuesCreateMatch)
+
 
 const GateWay =  process.env.PORT || 3000;
 server.listen(GateWay,()=>console.log(`Server Runing at ${GateWay}`))
